@@ -78,10 +78,16 @@ prev_y =0
 prev_z=0
 flag = True
 flag_start = False
+
 testcount = 0
 datalist = []
+
+prev_res = 0
 while(flag):
     data = SenseData(sense.get_compass_raw().values(), sense.get_orientation().values(), sense.get_gyroscope_raw().values(), sense.get_accelerometer_raw().values())
+    accelx = round(data.accelx,4) * 10
+    accely = round(data.accely,4) * 10
+    accelz = round(data.accelz,4) * 10
 
     if not flag_start:
         flag_start = True
@@ -89,38 +95,48 @@ while(flag):
         prev_y = round(data.accely,2)
         prev_z = round(data.accelz,2)
 
-    res = math.sqrt((data.accelx ** 2)+(data.accely ** 2)+(data.accelz ** 2))
-    print("TOTAL ACCELERATION  : " + str(res))
-    if round(data.accelx,2) == prev_x and round(data.accely,2) == prev_y and round(data.accelz,2) == prev_z:
+    res = math.sqrt((accelx ** 2)+(accely ** 2)+(accelz ** 2))
+    
+    # print("TOTAL ACCELERATION  : " + str(res))
+    diff_accel_x = abs((round(data.accelx,4) * 10) - (prev_x*10)) 
+    diff_accell_y = abs((round(data.accely,4) * 10) - (prev_y*10)) 
+    diff_accel_z = abs((round(data.accelz,4) * 10) - (prev_z*10))
+    if diff_accel_x < 1 and diff_accell_y < 1 and  diff_accel_z < 1:
         # If the device is not moving
         showLED(Motion.STATIONARY)
         data.set_motion(Motion.STATIONARY)
-        data.pr_orientation()
-        data.pr_gyro()
-        data.pr_accel()
+        prev_res = res
+        data.pr_compass()
+        # data.pr_orientation()
+        # data.pr_gyro()
+        # data.pr_accel()
+        # print("X: " + str(round(data.accelx,2) * 10) + " Y: " + str(round(data.accely,2) *10) +  " Z : " + str(round(data.accelz,2) * 10))
+        # print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
     else:
+
+        diff_gyro = (round(data.gyrox,1))< -0.5 or round(data.gyroy,1) < -0.5 or round(data.gyroz,1) < -0.5
+        print("X: " + str(abs((round(data.accelx,4) * 10) - (prev_x*10))) + " Y: " + str(abs((round(data.accely,4) * 10) - (prev_y*10))) +  " Z : " + str(abs((round(data.accelz,4) * 10) - (prev_z*10))))
         prev_x = round(data.accelx,2)
         prev_y = round(data.accely,2)
-        prev_z = round(data.accelz,2)
-
+        prev_z = round(data.accelz,2) 
+        data.pr_compass()
+        data.pr_gyro()
+        # print("X: " + str(round(data.accelx,2)  * 10) + " Y: " + str(round(data.accely,2) * 10) +  " Z : " + str(round(data.accelz,2) * 10))
         
-        if data.accely < 0:
+        # print("RES: " + str(res))
+        print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
+        if (diff_accel_x >= 2 or diff_accell_y >= 2 or diff_accel_z >= 2) and diff_gyro:
             data.set_motion(Motion.DOWN)
             showLED(Motion.DOWN)
         else:
-            if abs(res) >= 1.0:
-                data.set_motion(Motion.UP)
-                showLED(Motion.UP)
-            else:
-                showLED(Motion.OFF)
-        data.pr_orientation()
-        data.pr_gyro()
-        data.pr_accel()
+            data.set_motion(Motion.UP)
+            showLED(Motion.UP)
+
     
     datalist.append(data.data_list())
     testcount += 1
     sleep(0.5)
-    if (testcount == 30):
+    if (testcount == 100):
         flag = False
 
 
