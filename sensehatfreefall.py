@@ -7,10 +7,21 @@ from time import sleep
 from datetime import datetime
 import math
 import csv
-
+import paho.mqtt.client as mqtt
 
 sense = SenseHat()
 sense.set_imu_config(True, True, True)
+
+#MQTT 
+MQTTBROKER = 'test.mosquitto.org'
+PORT = 1883
+TOPIC = 'csc1010/falldetection'
+MESSAGE = 'Connected to Subscriber'
+
+publisher = mqtt.Client('python_pub')
+# To Connect to MQTT CLient
+publisher.connect(MQTTBROKER, PORT)
+publisher.publish(TOPIC, MESSAGE)
 
 # Turna all LED OFF
 sense.clear()
@@ -148,10 +159,20 @@ while(flag):
             # CHeck if any movement
 
             sleep(1)
-            if(abs(data.gyrox - lastmovement_x) > 0.5 or abs(data.gyrox - lastmovement_x) > 0.5 or abs(data.gyrox - lastmovement_x) > 0.5):
-                print("STILL ABLED")
-
+            isbuttonpressed = False
+            if(abs(data.gyrox - lastmovement_x) > 0.45 or abs(data.gyrox - lastmovement_x) > 0.45 or abs(data.gyrox - lastmovement_x) > 0.45):
+                sleep(1)
+                event = sense.stick.get_events()
+                print(event)
+                if len(event) > 0:
+                    isbuttonpressed = True
+                # print("STILL ABLED")
             
+            if not isbuttonpressed:
+                MESSAGE = "Fall Detected"
+                publisher.publish(TOPIC, MESSAGE)
+                print("Fall Detected message sent")
+
 
         else:
             data.set_motion(Motion.UP)
