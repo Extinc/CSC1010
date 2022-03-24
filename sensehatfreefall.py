@@ -3,11 +3,14 @@ from asyncore import write
 from cgitb import reset
 from re import L
 from sense_hat import SenseHat
-from time import sleep 
+from time import sleep, time
 from datetime import datetime
 import math
 import csv
 import paho.mqtt.client as mqtt
+from datetime import datetime
+import requests
+import json
 
 sense = SenseHat()
 sense.set_imu_config(True, True, True)
@@ -23,9 +26,31 @@ publisher = mqtt.Client('python_pub')
 publisher.connect(MQTTBROKER, PORT)
 publisher.publish(TOPIC, MESSAGE)
 
+yellow = (255, 255, 0)
 # Turna all LED OFF
 sense.clear()
 fieldnames = ["pitch", "roll", "yaw","gyrox", "gyroy", "gyroz" ,"accelx", "accely" , "accelz" , "Motion" ]
+
+
+# Function: send Pushbullet notification
+# Params: number of times emergency button has been pressed
+# Return: none
+def send_pushbullet_notification():
+    now = datetime.now()
+    StringDataHora = str(now.hour) + ":" + str(now.minute) + ":" + str(now.second) + " em " + str(now.day) + "/" + str(
+        now.month) + "/" + str(now.year)
+
+    StringMsg = "Fall Detected. Date and Time detected: " + StringDataHora + "."
+    data_send = {"type": "note", "title": "Notification - Fall Detected", "body": StringMsg}
+
+    # Pushbullet access token
+    access_token = 'o.jRw09nOWyyAhHhZKfx0J9i1ZOfKHRO9w'
+    result_notification_send = requests.post('https://api.pushbullet.com/v2/pushes', data=json.dumps(data_send),
+                                             headers={'Authorization': 'Bearer ' + access_token,
+                                                      'Content-Type': 'application/json'})
+
+    return
+
 class Motion:
     UP = 1
     DOWN = 2
@@ -35,16 +60,8 @@ class Motion:
     OFF = 0
 
 def showLED(value):
-    if value is Motion.UP:
-        sense.show_letter("U")
-    elif value is Motion.DOWN:
-        sense.show_letter("D")
-    elif value is Motion.LEFT:
-        sense.show_letter("L")  
-    elif value is Motion.RIGHT:
-        sense.show_letter("R")  
-    elif value is Motion.STATIONARY:
-        sense.show_letter("S")
+    if value is Motion.DOWN:
+        sense.clear(yellow)
     else:
         sense.clear()
 
@@ -147,7 +164,7 @@ while(flag):
         prev_y = round(data.accely,2)
         prev_z = round(data.accelz,2) 
 
-        print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
+        # print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
     
         if (diff_accel_x >= 2 or diff_accell_y >= 2 or diff_accel_z >= 2) and diff_gyro:
             data.set_motion(Motion.DOWN)
@@ -158,22 +175,35 @@ while(flag):
 
             # CHeck if any movement
 
-            sleep(1)
+            sleep(2)
             isbuttonpressed = False
-            if(abs(data.gyrox - lastmovement_x) > 0.45 or abs(data.gyrox - lastmovement_x) > 0.45 or abs(data.gyrox - lastmovement_x) > 0.45):
-                sleep(1)
-                event = sense.stick.get_events()
-                print(event)
-                if len(event) > 0:
-                    isbuttonpressed = True
+            print("Waiting for button input")
+            timestart = time.time()
+            while not isbuttonpressed:
+                
+                eventlist = sense.stick.get_events()
+
+                time2 = time.time()
+                if time2 - timestart >=5:
+                    break
+                for event in eventlist:
+                    if event.direction == 'middle' and event.action == 'pressed':
+                        isbuttonpressed = True
+                        print("Button has been pressed")
+                        event = sense.stick.wait_for_event(emptybuffer=True)
+                        break
+                        
+                
                 # print("STILL ABLED")
             
             if not isbuttonpressed:
+                sleep(1)
                 MESSAGE = "Fall Detected"
                 publisher.publish(TOPIC, MESSAGE)
                 print("Fall Detected message sent")
-
-
+                send_pushbullet_notification()
+            else:
+                isbuttonpressed = False
         else:
             data.set_motion(Motion.UP)
             showLED(Motion.UP)
