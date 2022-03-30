@@ -8,9 +8,6 @@ from datetime import datetime
 import math
 import csv
 import paho.mqtt.client as mqtt
-from datetime import datetime
-import requests
-import json
 
 sense = SenseHat()
 sense.set_imu_config(True, True, True)
@@ -30,26 +27,6 @@ yellow = (255, 255, 0)
 # Turna all LED OFF
 sense.clear()
 fieldnames = ["pitch", "roll", "yaw","gyrox", "gyroy", "gyroz" ,"accelx", "accely" , "accelz" , "Motion" ]
-
-
-# Function: send Pushbullet notification
-# Params: number of times emergency button has been pressed
-# Return: none
-def send_pushbullet_notification():
-    now = datetime.now()
-    StringDataHora = str(now.hour) + ":" + str(now.minute) + ":" + str(now.second) + " em " + str(now.day) + "/" + str(
-        now.month) + "/" + str(now.year)
-
-    StringMsg = "Fall Detected. Date and Time detected: " + StringDataHora + "."
-    data_send = {"type": "note", "title": "Notification - Fall Detected", "body": StringMsg}
-
-    # Pushbullet access token
-    access_token = 'o.jRw09nOWyyAhHhZKfx0J9i1ZOfKHRO9w'
-    result_notification_send = requests.post('https://api.pushbullet.com/v2/pushes', data=json.dumps(data_send),
-                                             headers={'Authorization': 'Bearer ' + access_token,
-                                                      'Content-Type': 'application/json'})
-
-    return
 
 class Motion:
     UP = 1
@@ -201,7 +178,6 @@ while(flag):
                 MESSAGE = "Fall Detected"
                 publisher.publish(TOPIC, MESSAGE)
                 print("Fall Detected message sent")
-                send_pushbullet_notification()
             else:
                 isbuttonpressed = False
         else:
