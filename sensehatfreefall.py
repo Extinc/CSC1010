@@ -113,7 +113,7 @@ while(flag):
         data.set_motion(Motion.STATIONARY)
 
     else:
-
+        showLED(None)
         diff_gyro = (round(data.gyrox,1))< -0.5 or round(data.gyroy,1) < -0.5 or round(data.gyroz,1) < -0.5
 
         prev_x = round(data.accelx,2)
@@ -145,7 +145,6 @@ while(flag):
                         isbuttonpressed = True
                         print("Button has been pressed")
                         event = sense.stick.wait_for_event(emptybuffer=True)
-                        sense.clear()
                         break
 
             
