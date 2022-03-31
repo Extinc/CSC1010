@@ -144,7 +144,7 @@ while(flag):
                     if event.direction == 'middle' and event.action == 'pressed':
                         isbuttonpressed = True
                         print("Button has been pressed")
-                        sense.clear()
+                        # sense.clear()
                         event = sense.stick.wait_for_event(emptybuffer=True)
                         break
 
