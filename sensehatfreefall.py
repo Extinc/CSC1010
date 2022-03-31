@@ -111,34 +111,15 @@ while(flag):
         # If the device is not moving
         showLED(Motion.STATIONARY)
         data.set_motion(Motion.STATIONARY)
-        # prev_res = res
-
-        # region FOr Testing
-        # data.pr_compass()
-        # data.pr_orientation()
-        # data.pr_gyro()
-        # data.pr_accel()
-        # print("X: " + str(round(data.accelx,2) * 10) + " Y: " + str(round(data.accely,2) *10) +  " Z : " + str(round(data.accelz,2) * 10))
-        # print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
-        # endregion
 
     else:
 
         diff_gyro = (round(data.gyrox,1))< -0.5 or round(data.gyroy,1) < -0.5 or round(data.gyroz,1) < -0.5
-        # region FOr Testing
-        # print("X: " + str(abs((round(data.accelx,4) * 10) - (prev_x*10))) + " Y: " + str(abs((round(data.accely,4) * 10) - (prev_y*10))) +  " Z : " + str(abs((round(data.accelz,4) * 10) - (prev_z*10))))
-        # data.pr_compass()
-        # data.pr_gyro()
-        # print("X: " + str(round(data.accelx,2)  * 10) + " Y: " + str(round(data.accely,2) * 10) +  " Z : " + str(round(data.accelz,2) * 10))
 
-        # print("RES: " + str(res))
-        # endregion
         prev_x = round(data.accelx,2)
         prev_y = round(data.accely,2)
         prev_z = round(data.accelz,2) 
 
-        # print("X: " + str(round(data.gyrox,1)) + " Y: " + str(round(data.gyroy, 1)) + " Z :"+ str(round(data.gyroz,1)))
-    
         if (diff_accel_x >= 2 or diff_accell_y >= 2 or diff_accel_z >= 2) and diff_gyro:
             data.set_motion(Motion.DOWN)
 
@@ -163,11 +144,10 @@ while(flag):
                     if event.direction == 'middle' and event.action == 'pressed':
                         isbuttonpressed = True
                         print("Button has been pressed")
+                        sense.clear()
                         event = sense.stick.wait_for_event(emptybuffer=True)
                         break
-                        
-                
-                # print("STILL ABLED")
+
             
             if not isbuttonpressed:
                 sleep(1)
