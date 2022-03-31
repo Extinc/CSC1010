@@ -1,11 +1,7 @@
-from ast import Or
-from asyncore import write
-from cgitb import reset
-from re import L
 from sense_hat import SenseHat
-from time import sleep, time
+from time import sleep
+import time
 from datetime import datetime
-import math
 import csv
 import paho.mqtt.client as mqtt
 
@@ -187,16 +183,6 @@ while(flag):
         lastmovement_x = data.gyrox
         lastmovement_y = data.gyroy
         lastmovement_z = data.gyroz
-    
-    datalist.append(data.data_list())
-    testcount += 1
+
     sleep(0.7)
-    if (testcount == 100):
-        flag = False
 
-
-# open the file in the write mode
-with open('testdata.csv', 'w', newline ='') as f:
-    writer = csv.DictWriter(f, fieldnames = fieldnames)
-    writer.writeheader()
-    writer.writerows(datalist)
