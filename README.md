@@ -9,7 +9,9 @@
 | Samantha Lee|
 | Lim Shi Jie|
 
-##
+## Information
+
+This project uses raspberry pi and raspberry sense hat
 
 
 ##Requirements
