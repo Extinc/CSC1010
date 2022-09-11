@@ -1,12 +1,19 @@
 # CSC1010
 
-Requirements
 
-pip3 install paho-mqtt python-etcd
-<br/>
+## Team
 |Team Member|
 |:-----:|
 | Carlsen Teo|
 | LIM KEI YIANG|
 | Samantha Lee|
 | Lim Shi Jie|
+
+##
+
+
+##Requirements
+
+pip3 install paho-mqtt python-etcd
+<br/>
+
